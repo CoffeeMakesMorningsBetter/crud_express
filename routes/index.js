@@ -1,40 +1,72 @@
-const express = require('express')
+const express = require("express");
+const router = express.Router();
+const db = require("../db");
 
-const router = express.Router()
-
-const items = [{itemName: 'chips', id: 0}]
-let id = 1
-
-router.get("", (req, res, next) => {
-  return res.json(items)
-})
-
-router.post("", (req, res, next) => {
-  users.push({
-    itemName: req.body.itemName,
-    id: ++id
-  })
-})
-
-router.get("/:id", (req, res, next) => {
-  const singleItem = items.find(item => item.id === Number(req.params.id))
-  if(!singleItem) {
+router.get("", async function(req, res, next) {
+  try {
+    const results = await db.query(`SELECT * FROM items`);
+    console.log('WTF, WTF')
+    return res.json(results.rows)
+  } catch (err) {
+    console.log('WFTHEEE')
     return next(err)
   }
-  console.log(singleItem)
-  return res.json(singleItem)
 })
 
-router.get("/:id", (req, res, next) => {
-  const singleItem = items.find(item => item.id === Number(req.params.id))
-  singleItem.itemName = req.body.itemName
-  return res.json({ message: "Updated" })
+router.post("", async function(req, res, next) {
+  try {
+    const { name, type } = req.body
+    const results = await db.query(
+      `INSERT INTO items(name, type) VALUES($1, $2) RETURNING *`,
+      [name, type]
+    );
+    return res.json(results.rows[0])
+  } catch (err) {
+    return next(err)
+  }
 })
 
-router.delete("/:id", (req, res, next) => {
-  const removeItem = items.findIndex(item => item.id === Number(req.params.id))
-  items.slice(removeItem,1)
-  return res.json({ message: "Deleted" });
+router.patch("/:id", async function(req, res, next) {
+  try {
+    const { name, type } = req.body
+    const id = req.params.id
+    console.log(req.params.id)
+    console.log(name)
+    console.log(type)
+    const results = await db.query(
+      `UPDATE items SET name=$1, type=$2 WHERE id=$3 RETURNING *`,
+      [name, type, id]
+    );
+    return res.json(results.rows[0])
+  } catch(err) {
+    return next(err)
+  }
+})
+
+router.get("/:id", async function(req, res, next) {
+  try {
+    const id  = req.params.id
+    const results = await db.query(
+      `SELECT * FROM items WHERE id=$1`,
+      [id]
+    );
+    return res.json(results.rows)
+  } catch(err) {
+    return next(err)
+  }
+})
+
+router.delete("/:id", async function(req, res, next) {
+  try {
+    const id = req.params.id 
+    const results = await db.query(
+      `DELETE FROM items WHERE id=$1`,
+      [id]
+    );
+    return res.json({ message: "Deleted" })
+  } catch(err) {
+    return next(err)
+  }
 })
 
 module.exports = router
