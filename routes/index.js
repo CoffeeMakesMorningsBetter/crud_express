@@ -16,6 +16,7 @@ router.get("", async function(req, res, next) {
 router.post("", async function(req, res, next) {
   try {
     const { name, type } = req.body
+    console.log('MOTHA TURD')
     const results = await db.query(
       `INSERT INTO items(name, type) VALUES($1, $2) RETURNING *`,
       [name, type]
