@@ -14,32 +14,27 @@ $(document).ready(function() {
     });
   });
 
-  $container.on("click", ".updateSub", function(e) {
-    e.preventDefault()
-    const name = $("#name").val();
-    const type = $("#type").val();
-    const id = Number($(".updateSub").attr('id'))
-    $.patch("http://localhost:3000/items/${id}", { name, type }).then(function(fish) {
-      console.log('update')
-    });
-  })
-
-  $(".submit").on("submit", function(e) {
+  $("#new-fish-form").on("submit", function(e) {
     e.preventDefault();
     const name = $("#name").val();
     const type = $("#type").val();
-    $.post("http://localhost:3000/items", { name, type }).then(function(fish) {
-      let $newFish = $("<li>", {
-        html: `
-            ${fish.name} ${fish.type}
-            <button class="delete">X</button>
-            <button class="update">U</button>
-        `,
-        "data-id": `${fish.id}`
+
+    if(!name || !type) {
+      alert('Name and type must be filled out!!!!')
+    } else {
+      $.post("http://localhost:3000/items", { name, type }).then(function(fish) {
+        let $newFish = $("<li>", {
+          html: `
+              ${fish.name} ${fish.type}
+              <button class="delete">X</button>
+              <button class="update">U</button>
+          `,
+          "data-id": `${fish.id}`
+        });
+        $container.append($newFish);
+        $("#new-fish-form").trigger("reset");
       });
-      $container.append($newFish);
-      $("#new-fish-form").trigger("reset");
-    });
+    }
   });
 
   $container.on("click", ".delete", function(e) {
@@ -76,5 +71,15 @@ $(document).ready(function() {
        $("#name").val(value[0].name);
        $("#type").val(value[0].type)
     })
+  })
+
+  $container.on("click", ".updateSub", function(e) {
+    e.preventDefault()
+    const name = $("#name").val();
+    const type = $("#type").val();
+    const id = Number($(".updateSub").attr('id'))
+    $.patch("http://localhost:3000/items/${id}", { name, type }).then(function(fish) {
+      console.log('update')
+    });
   })
 });
